@@ -70,4 +70,4 @@ Built for the **Halloween ChaincKathon** to “Stop the Boogeyman” — securin
 
 ### **👥 Team**
 
-Built by ** Makinde Oluwasegun ** — Security builder passionate about decentralized trust systems.
+Built by **${Makinde Oluwasegun}** — Security builder passionate about decentralized trust systems.
