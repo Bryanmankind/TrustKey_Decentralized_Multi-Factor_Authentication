@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {MockEnclave} from "./enclaveMock/enclave.sol";
 
 contract TrustKey {
 
@@ -20,7 +21,13 @@ contract TrustKey {
   
     event AttestationRegistered(address indexed user, bytes32 enclaveHash);
 
-    function registerAttestation(bytes32 enclaveHash) external {
+    function getExpectedEnclaveHash() external {
+        bytes32 enclaveHash = MockEnclave.getEnclaveHash();
+
+        _registerAttestation(enclaveHash);
+    }
+
+    function _registerAttestation(bytes32 enclaveHash) internal {
         attestations[msg.sender] = trustAttestation(enclaveHash, true);
         emit AttestationRegistered(msg.sender, enclaveHash);
     }
