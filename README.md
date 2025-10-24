@@ -15,7 +15,7 @@ There’s currently **no native way** to prove that a signature came from a *tru
 
 ---
 
-### ** The Solution**
+### **The Solution**
 
 TrustKey adds a **TEE-backed second signature** to all critical actions.
 
