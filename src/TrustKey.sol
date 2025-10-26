@@ -27,6 +27,7 @@ contract TrustKey {
         _registerAttestation(enclaveHash);
     }
 
+
     function _registerAttestation(bytes32 enclaveHash) internal {
         attestations[msg.sender] = trustAttestation(enclaveHash, true);
         emit AttestationRegistered(msg.sender, enclaveHash);
