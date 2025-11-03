@@ -62,12 +62,3 @@ export const trustKeyAbi = [
     ]
   }
 ];
-
-const trustKeyContract = (web3Instance) => {
-  return new web3Instance.eth.Contract(
-    trustKeyAbi,
-    "0x8464135c8F25Da09e49BC8782676a84730C318bC" 
-  );
-};
-
-export default trustKeyContract;

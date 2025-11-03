@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import {trustKeyContract, trustKeyAbi} from "../TrustKeyABI/trustKeyAbi";
+import {trustKeyAbi} from "../TrustKeyABI/trustKeyAbi";
 import { Contract, ethers } from "ethers";
 
 export default function TrustKeyApp() {
   const [account, setAccount] = useState(null);
   const [status, setStatus] = useState("");
+  const [signer, setSigner] = useState(null);
+  const [contract, setContract] = useState(null);
 
   async function connectWallet() {
     if (window.ethereum) {
@@ -20,6 +22,7 @@ export default function TrustKeyApp() {
 
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
+
     const contract = new Contract("0x8464135c8F25Da09e49BC8782676a84730C318bC", trustKeyAbi, signer);
 
     
@@ -30,8 +33,32 @@ export default function TrustKeyApp() {
       setStatus("Attestation registered!");
     } catch (error) {
       console.error(error);
-      setStatus("Transaction failed: " + error.message);
+      setStatus("Transaction failed!");
     }
+
+    setSigner(signer);
+    setContract(contract);
+  }
+
+  async function getTransactionDetails(contract){
+    if (!account) return alert("Connect wallet first!");
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+
+    const txSignature = await signer.getAddress();
+    const txDetails = await provider.getTransaction(txSignature);
+
+    const enclaveSig = "0x..."; // Replace with actual enclave signature
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 2; // 2minutes from now
+    try {
+      const tx = await contract.verifyTransaction(txSignature, enclaveSig, txDetails, deadline);
+      await tx.wait();
+      setStatus("Transaction verified!");
+    } catch (error) {
+      console.error(error);
+      setStatus("Invalid transaction: " + error.message);
+    }
+
   }
 
   return (
