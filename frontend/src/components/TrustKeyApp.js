@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ethers } from "ethers";
+import {trustKeyContract, trustKeyAbi} from "../TrustKeyABI/trustKeyAbi";
+import { Contract, ethers } from "ethers";
 
 export default function TrustKeyApp() {
   const [account, setAccount] = useState(null);
@@ -14,18 +15,24 @@ export default function TrustKeyApp() {
     }
   }
 
-  // async function registerAttestation() {
-  //   if (!account) return alert("Connect wallet first!");
+  async function registerAttestation() {
+    if (!account) return alert("Connect wallet first!");
 
-  //   const provider = new ethers.BrowserProvider(window.ethereum);
-  //   const signer = await provider.getSigner();
-  //   const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const contract = new Contract("0x8464135c8F25Da09e49BC8782676a84730C318bC", trustKeyAbi, signer);
 
-  //   const tx = await contract.getExpectedEnclaveHash();
-  //   setStatus("Transaction sent...");
-  //   await tx.wait();
-  //   setStatus("Attestation registered!");
-  // }
+    
+    try {
+      setStatus("Transaction pending...");
+      const tx = await contract.getExpectedEnclaveHash();
+      await tx.wait();
+      setStatus("Attestation registered!");
+    } catch (error) {
+      console.error(error);
+      setStatus("Transaction failed: " + error.message);
+    }
+  }
 
   return (
     <div className="homePage">
@@ -38,7 +45,7 @@ export default function TrustKeyApp() {
         <h2>TrustKey Safe App </h2>
         <p>Register your wallet address attestation on the blockchain.</p>
 
-      <button>Register Wallet Address Attestation</button>
+      <button onClick={registerAttestation}>Register Wallet Address Attestation</button>
       <p>{status}</p>
     </div>
   );
