@@ -3,6 +3,10 @@ import {trustKeyAbi} from "../TrustKeyABI/trustKeyAbi";
 import { Contract, ethers } from "ethers";
 
 export default function TrustKeyApp() {
+
+  // WebSocket provider for listening to pending transactions
+  const wsProvider = new ethers.WebSocketProvider("wss://127.0.0.1:8546");
+
   const [account, setAccount] = useState(null);
   const [status, setStatus] = useState("");
   const [signer, setSigner] = useState(null);
@@ -40,26 +44,18 @@ export default function TrustKeyApp() {
     setContract(contract);
   }
 
-  async function getTransactionDetails(contract){
-    if (!account) return alert("Connect wallet first!");
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
+   async function trackTransactionsHash(account, contract) {
+    wsProvider.on("pending", async (txHash) => {
+      const tx = await wsProvider.getTransaction(txHash);
+      if (!tx) return;
+      if (tx.from?.toLowerCase() === account.toLowerCase()) {
+        console.log("Pending transaction from account:", tx);
+      }
 
-    const txSignature = await signer.getAddress();
-    const txDetails = await provider.getTransaction(txSignature);
+    });
+}
 
-    const enclaveSig = "0x..."; // Replace with actual enclave signature
-    const deadline = Math.floor(Date.now() / 1000) + 60 * 2; // 2minutes from now
-    try {
-      const tx = await contract.verifyTransaction(txSignature, enclaveSig, txDetails, deadline);
-      await tx.wait();
-      setStatus("Transaction verified!");
-    } catch (error) {
-      console.error(error);
-      setStatus("Invalid transaction: " + error.message);
-    }
 
-  }
 
   return (
     <div className="homePage">
