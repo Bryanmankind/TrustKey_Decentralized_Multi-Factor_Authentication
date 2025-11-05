@@ -12,6 +12,7 @@ export default function TrustKeyApp() {
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
 
+  
   async function connectWallet() {
     if (window.ethereum) {
       const [selectedAccount] = await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -44,16 +45,37 @@ export default function TrustKeyApp() {
     setContract(contract);
   }
 
-   async function trackTransactionsHash(account, contract) {
-    wsProvider.on("pending", async (txHash) => {
-      const tx = await wsProvider.getTransaction(txHash);
-      if (!tx) return;
-      if (tx.from?.toLowerCase() === account.toLowerCase()) {
-        console.log("Pending transaction from account:", tx);
-      }
 
+  async function trackTransactionsHash(account) {
+    const wsProvider = new ethers.WebSocketProvider("ws://127.0.0.1:8545");
+
+    wsProvider.on("pending", async (txHash) => {
+      try {
+        const tx = await wsProvider.getTransaction(txHash);
+        if (!tx || !tx.from) return;
+
+        // Only verify if transaction is from target account
+        if (tx.from.toLowerCase() !== account.toLowerCase()) return;
+
+
+        // Rebuild signature if needed
+        const userSignature = tx.signature
+          ? tx.signature
+          : ethers.Signature.from({ v: tx.v, r: tx.r, s: tx.s }).serialized;
+
+        // Compute message hash (digest that was actually signed)
+        const unsignedTx = ethers.Transaction.from(tx).unsignedSerialized;
+        const messageHash = ethers.keccak256(unsignedTx);
+
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
+
+        await contract.verifyTransaction(userSignature, enclaveSIG, messageHash, deadline);
+        setStatus("Transaction verified!");
+      } catch (error) {
+        console.log("Transaction verification failed");
+      }
     });
-}
+  }
 
 
 
