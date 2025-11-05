@@ -19,6 +19,7 @@ export default function TrustKeyApp() {
     }
   }
 
+
   async function registerAttestation() {
     if (!account) return alert("Connect wallet first!");
 
@@ -26,7 +27,6 @@ export default function TrustKeyApp() {
     const signer = await provider.getSigner();
 
     const contract = new Contract("0x8464135c8F25Da09e49BC8782676a84730C318bC", trustKeyAbi, signer);
-
     
     try {
       setStatus("Transaction pending...");
@@ -53,7 +53,6 @@ export default function TrustKeyApp() {
 
         // Only verify if transaction is from target account
         if (tx.from.toLowerCase() !== account.toLowerCase()) return;
-
 
         // Rebuild signature if needed
         const userSignature = tx.signature
