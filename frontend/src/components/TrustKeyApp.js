@@ -4,9 +4,6 @@ import { Contract, ethers } from "ethers";
 
 export default function TrustKeyApp() {
 
-  // WebSocket provider for listening to pending transactions
-  const wsProvider = new ethers.WebSocketProvider("wss://127.0.0.1:8546");
-
   const [account, setAccount] = useState(null);
   const [status, setStatus] = useState("");
   const [signer, setSigner] = useState(null);
